@@ -1,5 +1,6 @@
 import pygame
 import sys
+import json
 
 pygame.init()
 
@@ -34,23 +35,42 @@ def main():
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                # Get the position of the mouse click
+                
                 mouse_x, mouse_y = pygame.mouse.get_pos()
                 col = mouse_x // GRID_SIZE
                 row = mouse_y // GRID_SIZE
 
-                # Add barrier, player, box, or target based on keys pressed
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_b]:  # B for barrier
-                    grid[row][col] = 'barrier'
+                    grid[row][col] = 'barrier' if grid[row][col] != 'barrier' else ''
                 elif keys[pygame.K_p]:  # P for player
-                    grid[row][col] = 'player'
+                    grid[row][col] = 'player' if grid[row][col] != 'player' else ''
                 elif keys[pygame.K_x]:  # X for box
-                    grid[row][col] = 'box'
+                    grid[row][col] = 'box' if grid[row][col] != 'box' else ''
                 elif keys[pygame.K_g]:  # G for target goal
-                    grid[row][col] = 'goal'
+                    grid[row][col] = 'goal' if grid[row][col] != 'goal' else ''
+            
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_s:
+                    barriers = []
+                    player = None
+                    box = None
+                    goals = None
+                    for row in range(GRID_ROWS):
+                        for col in range(GRID_COLS):
+                            if grid[row][col] == 'barrier':
+                                barriers.append((row, col))
+                            elif grid[row][col] == 'player':
+                                player = (row, col)
+                            elif grid[row][col] == 'box':
+                                box = (row, col)
+                            elif grid[row][col] == 'goal':
+                                goals = (row, col)
+                    if player and box and goals:
+                        with open('map.json', 'w') as f:
+                            json.dump({'barriers': barriers, 'player': player, 'box': box, 'goals': goals}, f)
+                            print('Map saved to map.json')
 
-        # Draw grid and cells
         screen.fill(BLACK)
         draw_grid()
         for row in range(GRID_ROWS):
